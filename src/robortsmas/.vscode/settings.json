@@ -1,0 +1,13 @@
+{
+    "files.associations": {
+        "array": "cpp",
+        "string_view": "cpp",
+        "condition_variable": "cpp",
+        "cmath": "cpp",
+        "complex": "cpp",
+        "iterator": "cpp",
+        "iostream": "cpp",
+        "numeric": "cpp",
+        "algorithm": "cpp"
+    }
+}
