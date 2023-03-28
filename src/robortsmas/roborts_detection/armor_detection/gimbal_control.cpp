@@ -70,12 +70,12 @@ void GimbalContrl::Transform(cv::Point3f &postion, float &pitch, float &yaw) {
   // ROS_WARN("positionx : %.2f positiony : %.2f positionz : %.2f", postion.x, postion.y, postion.z);
   
   // pitch = -GetPitch((postion.z + offset_.z) / 100, -(postion.y + offset_.y) / 100, 15) + (float)(offset_pitch_ * 3.1415926535 / 180);
-  
   // pitch = -GetPitch((postion.z + offset_.z) / 100, -(postion.y + offset_.y) / 100, init_v_) + (float)(offset_pitch_ * 3.1415926535 / 180);
 
-  double tan_pitch = postion.y / sqrt(postion.x*postion.x + postion.z * postion.z);
-	double tan_yaw = postion.x / postion.z;
+  // 记得加入重力补偿（或者角度补偿） minipc上的那版
+  double tan_pitch = postion.y / sqrt(postion.x * postion.x + postion.z * postion.z);
 	pitch = -atan(tan_pitch);  // pitch = -atan(tan_pitch) * 180 / CV_PI;
+  pitch += offset_pitch_ / 180 * CV_PI; // 线性角度偏移
 
   // pitch = atan2(0.6, distance/1000);// / 3.1415926535 * 180;
   ROS_WARN("pitch : %.2f", pitch);

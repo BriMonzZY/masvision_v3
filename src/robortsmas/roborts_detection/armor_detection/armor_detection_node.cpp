@@ -26,7 +26,7 @@ ArmorDetectionNode::ArmorDetectionNode():
     initialized_(false),
     detected_enemy_(false),
     undetected_count_(0),
-    as_(nh_, "armor_detection_node_action", boost::bind(&ArmorDetectionNode::ActionCB, this, _1), false) {
+    as_(nh_, "armor_detection_node_action", boost::bind(&ArmorDetectionNode::ActionCB, this, _1), false) {  // ??????
   initialized_ = false;
   enemy_nh_ = ros::NodeHandle();
   if (Init().IsOK()) {
@@ -39,7 +39,8 @@ ArmorDetectionNode::ArmorDetectionNode():
   as_.start();
 }
 
-ErrorInfo ArmorDetectionNode::Init() {
+ErrorInfo ArmorDetectionNode::Init()
+{
   enemy_info_pub_ = enemy_nh_.advertise<roborts_msgs::GimbalAngle>("cmd_gimbal_angle", 100);
   ArmorDetectionAlgorithms armor_detection_param;
 
@@ -74,7 +75,13 @@ ErrorInfo ArmorDetectionNode::Init() {
     return ErrorInfo(ErrorCode::OK);
 }
 
-void ArmorDetectionNode::ActionCB(const roborts_msgs::ArmorDetectionGoal::ConstPtr &data) {
+/**
+ * @brief 
+ * 
+ * @param data 
+ */
+void ArmorDetectionNode::ActionCB(const roborts_msgs::ArmorDetectionGoal::ConstPtr &data)
+{
   roborts_msgs::ArmorDetectionFeedback feedback;
   roborts_msgs::ArmorDetectionResult result;
   bool undetected_msg_published = false;
@@ -145,6 +152,10 @@ void ArmorDetectionNode::ActionCB(const roborts_msgs::ArmorDetectionGoal::ConstP
   }
 }
 
+/**
+ * @brief 执行循环 
+ * 
+ */
 void ArmorDetectionNode::ExecuteLoop() {
   undetected_count_ = undetected_armor_delay_;
 
@@ -190,6 +201,10 @@ void ArmorDetectionNode::ExecuteLoop() {
   }
 }
 
+/**
+ * @brief 
+ * 
+ */
 void ArmorDetectionNode::PublishMsgs() {
   enemy_info_pub_.publish(gimbal_angle_);
 }

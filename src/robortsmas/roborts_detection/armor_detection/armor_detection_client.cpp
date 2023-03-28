@@ -33,6 +33,12 @@ int main(int argc, char **argv) {
 
   char command = '0';
 
+  // 直接启动装甲板检测
+  goal.command = 1;
+  ROS_INFO("I am running the request");
+  ac.sendGoal(goal);
+
+#if 0
   while (command != '4') {
     std::cout << "**************************************************************************************" << std::endl;
     std::cout << "*********************************please send a command********************************" << std::endl;
@@ -71,5 +77,6 @@ int main(int argc, char **argv) {
         break;
     }
   }
+#endif
   return 0;
 }
