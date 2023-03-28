@@ -1,59 +1,38 @@
 # masvision_v2
 
-**Mas步兵自瞄**
+**Mas步兵自瞄v2**
 
 
 
-相关链接：
+## TODO
 
-> RoboRTS文档：https://robomaster.github.io/RoboRTS-Tutorial/#/sdk_docs/architecture
->
-> RoboRTS仓库：https://github.com/RoboMaster/RoboRTS
->
-> 嵌入式端仓库：https://github.com/RoboMaster/RoboRTS-Firmware
->
-> roborts_base模块最新仓库：https://github.com/RoboMaster/RoboRTS-Base
->
-> 中科院自动化所rmua：https://github.com/DRL-CASIA/RMAI2020-Planning
->
-> 中科院自动化所rmua：https://github.com/DRL-CASIA/RMAI2020-Perception
->
-> 中科院自动化所rmua：https://github.com/DRL-CASIA/RMAI2020-Decision
->
-> 哈工深ruma：https://github.com/Critical-HIT-hitsz/RMUA2022
->
-> gazebo仿真：https://github.com/nwpu-v5-team/ICRA-Firefly-Emulator
-
-
+- [ ] 结果预测
+- [ ] 结果滤波
+- [ ] 修改图像预处理方案
 
 
 
 ## 整体架构
 
-RobotRTS_Mas基于 [RoboRTS](https://github.com/RoboMaster/RoboRTS) ，运行于ros-noetic
+masvision_v2基于 [RoboRTS](https://github.com/RoboMaster/RoboRTS) 的detection部分编写，运行于ros-noetic
 
 整个工程使用**抽象工场模式**来构建
 
 下面是框架包含的软件包和对应的功能以及依赖的软件包
 
-| Package              | 功能               | 内部依赖                                                     |
-| -------------------- | ------------------ | ------------------------------------------------------------ |
-| roborts              | Meta-package       | -                                                            |
-| roborts_base         | 嵌入式通信接口     | roborts_msgs                                                 |
-| roborts_camera       | 相机驱动包         | roborts_common                                               |
-| roborts_common       | 通用依赖包         | -                                                            |
-| roborts_decision     | 机器人决策包       | roborts_common roborts_msgs roborts_costmap                  |
-| roborts_detection    | 视觉识别算法包     | roborts_msgs roborts_common roborts_camera                   |
-| roborts_localization | 机器人定位算法包   | -                                                            |
-| roborts_costmap      | 代价地图相关支持包 | roborts_common                                               |
-| roborts_msgs         | 自定义消息类型包   | -                                                            |
-| roborts_planning     | 运动规划算法包     | roborts_common roborts_msgs roborts_costmap                  |
-| roborts_bringup      | 启动包             | roborts_base roborts_common roborts_localization roborts_costmap roborts_msgs roborts_planning |
-| roborts_tracking     | 视觉追踪算法包     | roborts_msgs                                                 |
+| Package           | 功能             | 内部依赖                                   |
+| ----------------- | ---------------- | ------------------------------------------ |
+| roborts_base      | 嵌入式通信接口   | roborts_msgs                               |
+| roborts_camera    | 相机驱动包       | roborts_common                             |
+| roborts_common    | 通用依赖包       | -                                          |
+| roborts_detection | 视觉识别算法包   | roborts_msgs roborts_common roborts_camera |
+| roborts_msgs      | 自定义消息类型包 | -                                          |
+| roborts_bringup   | 启动包           | roborts_base roborts_common roborts_msgs   |
+| roborts_tracking  | 视觉追踪算法包   | roborts_msgs                               |
 
 
 
-## RoboRTS_Mas依赖环境和编译工具
+## masvision_v2依赖环境和编译工具
 
 - Ubuntu 20.04LTS
 - ROS-noetic
@@ -65,17 +44,11 @@ RobotRTS_Mas基于 [RoboRTS](https://github.com/RoboMaster/RoboRTS) ，运行于
 ```shell
 sudo apt-get install -y ros-noetic-cv-bridge           \
                         ros-noetic-image-transport     \
-                        ros-noetic-stage-ros           \
-                        ros-noetic-map-server          \
-                        ros-noetic-laser-geometry      \
                         ros-noetic-interactive-markers \
                         ros-noetic-tf                  \
                         ros-noetic-pcl-*               \
                         ros-noetic-libg2o              \
-                        ros-noetic-rplidar-ros         \
                         ros-noetic-rviz                \
-                        ros-noetic-amcl			   	   \
-                        ros-noetic-navigation		   \
                         ros-noetic-usb-cam*			   \
                         ros-noetic-image-view		   \
                         ros-noetic-teleop-twist-keyboard \
@@ -108,18 +81,6 @@ catkin clean package_name # 清除指定build文件
 source /opt/ros/noetic/setup.bash
 source ./devel/setup.bash
 ```
-
-
-
-## 什么是ActionLib
-
-[Action Lib wiki](http://wiki.ros.org/actionlib)
-
-ActionLib是类似于service的问答通讯机制，适用于控制机器人运动到地图中某一目标位置一类的任务
-
-ActionClient和ActionServer之间使用action protocol通信
-
-ROS Messages：goal、cancel、status、feedback、result
 
 
 
@@ -220,38 +181,6 @@ uint8_t cmd_set_prefix[] = {cmd_id, cmd_set};
 | ------ | -------- |
 | cmdid  | 2        |
 
-**（下面的表格应该是错误的，来自官方）**
-
-| 命令码 | 传输方向  | 功能介绍               | 频率               |
-| ------ | --------- | ---------------------- | ------------------ |
-| 0x0001 | 主控-->PC | 比赛时机器人状态       | 裁判系统10Hz       |
-| 0x0002 | 主控-->PC | 实时伤害数据           | 受到攻击时发送     |
-| 0x0003 | 主控-->PC | 实时射击数据           | 裁判系统           |
-| 0x0004 | 主控-->PC | 实时功率、热量数据     | ICRA不使用，不发送 |
-| 0x0005 | 主控-->PC | 场地 RFID 数据         | 检测到 IC 卡发送   |
-| 0x0006 | 主控-->PC | 比赛结果数据           | 比赛结束时发送     |
-| 0x0007 | 主控-->PC | 获得 buff 数据         | 裁判系统           |
-| 0x0008 | 主控-->PC | 场地 UWB 数据          | 裁判系统           |
-| 0x0204 | 主控-->PC | 机器人底盘相关信息     | 100Hz定频          |
-| 0x0304 | 主控-->PC | 机器人云台相关信息     | 100Hz定频          |
-| 0x0402 | 主控-->PC | UWB相关信息            | UWB更新频率        |
-| 0x0206 | PC-->主控 | 设置底盘速度           |                    |
-| 0x0208 | PC-->主控 | 设置底盘速度(有加速度) |                    |
-| 0x0309 | PC-->主控 | 控制摩擦轮转速         | 开启摩擦轮使用     |
-| 0x030A | PC-->主控 | 控制射击               |                    |
-| 0x0403 | PC-->主控 | 云台相关校准信息       | 需要校准云台时发送 |
-
-
-
-正确的表格（来自代码）：
-
-| 命令码 | cmd_set | cmd_id | 传输方向  | 功能介绍                 | 频率  |
-| ------ | ------- | ------ | --------- | ------------------------ | ----- |
-| 0x0001 | 0x00    | 0x01   | PC-->主控 | ROS运行心跳              | 300ms |
-| 0x0002 | 0x00    | 0x02   | PC-->主控 | SDK初始化发布version信息 | 300ms |
-
-
-
 
 
 #### 数据
@@ -283,38 +212,6 @@ uint8_t cmd_set_prefix[] = {cmd_id, cmd_set};
 | 校验数据 | 占用字节 |
 | -------- | -------- |
 | crc_data | 4        |
-
-
-
----
-
-### roborts_sdk
-
-硬件层
-
-协议层
-
-
-
-
-
-## roborts_localization
-
-得到机器人在地图中坐标系中的坐标
-
-框架默认使用amcl算法来做定位
-
-如果使用amcl算法，可以直接使用ros提供的amcl包来实现
-
-```shell
-sudo apt install ros-noetic-amcl -y
-```
-
-
-
-### AMCL自适应蒙特卡洛定位
-
-
 
 
 
@@ -405,8 +302,6 @@ roborts_bringup的usb_cam.launch文件里修改标定文件的路径
 
 ### 装甲板检测
 
-**TODO：修改移植自瞄算法，在框架实现的基础上细化**
-
 在armor_detection_node.cpp的**ExecuteLoop()**函数中执行检测算法并发布姿态信息
 
 装甲板检测流程均在constraint_set.cpp的**DetectArmor()**中执行
@@ -416,119 +311,6 @@ roborts_bringup的usb_cam.launch文件里修改标定文件的路径
 
 
 在没有摄像头的情况下可以使用videototopic节点和detection节点进行快速验证
-
-
-
-## roborts_costmap
-
-代价地图模块
-
-global_planner和local_planner创建对应的costmap用于导航
-
-
-
-
-
-## roborts_planning
-
-可以使用ros的navigation包替代
-
-```shell
-sudo apt install ros-noetic-navigation
-```
-
-
-
-### global_planner
-
-global_planner_test节点
-
-
-
-### local_planner
-
-local_planner节点负责局部路径规划的逻辑调度
-
-
-
-#### Vel_Converter
-
-vel_converter节点在仿真时将局部路径规划速度转为cmd_vel发布
-
-
-
-```shell
-rostopic pub -r 10 /cmd_vel geometry_msgs/Twist '{linear: {x: 1, y: 0, z: 0}, angular: {x: 0, y: 0, z: 0}}' # 1米/秒往前走
-
-rostopic pub -r 10 /cmd_vel geometry_msgs/Twist '{linear: {x: 0, y: 0, z: 0}, angular: {x: 0, y: 0, z: 6.28}}' # 原地打转
-
-rostopic pub -r 10 /cmd_vel geometry_msgs/Twist '{linear: {x: -1, y: 0, z: 0}, angular: {x: 0, y: 0, z: 0}}' # 1米/秒往后走
-```
-
-
-
-## move base
-
-http://wiki.ros.org/move_base
-
-
-
-机器人前进一米：
-
-```shell
-rostopic pub /move_base_simple/goal geometry_msgs/PoseStamped \
-'{ header: { frame_id: "base_link" }, pose: { position: { x: 1.0, y: 0, z: 0 }, orientation: { x: 0, y: 0, z: 0, w: 1 } } }'
-```
-
-
-
-> global_planner使用A*或者Dijkstra
->
-> local_planner中TEB的效果最好
-
-
-
-使用Dijkstra和TEB的launch文件：
-
-```xml
-<launch>
-  <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen" clear_params="true">
-    <rosparam file="$(find package)/config1/costmap_common_params.yaml" command="load" ns="global_costmap" />
-    <rosparam file="$(find package)/config1/costmap_common_params.yaml" command="load" ns="local_costmap" />
-    <rosparam file="$(find package)/config1/local_costmap_params.yaml" command="load" />
-    <rosparam file="$(find package)/config1/global_costmap_params.yaml" command="load" />
-    <rosparam file="$(find package)/config1/teb_local_planner_params.yaml" command="load" />
- 
-     <param name="base_global_planner" value="global_planner/GlobalPlanner"/> 
-     <param name="planner_frequency" value="1.0" />
-     <param name="planner_patience" value="5.0" />
- 
-     <param name="base_local_planner" value="teb_local_planner/TebLocalPlannerROS" />
-     <param name="controller_frequency" value="15.0" />
-     <param name="controller_patience" value="15.0" />
-  </node>
-</launch>
-```
-
-
-
-## roborts_decision
-
-**决策模块**
-
-（划掉）（可以使用` sudo apt-get install ros-kinetic-behaviortree-cpp-v3`）
-
-
-
-地图在roborts_stage.launch中<arg *name*="map" *value*="rmul2023"/>处修改
-
-
-
-实际地图尺寸和map中像素的换算关系：1m=20个像素
-
-
-
-运行节点测试：见启动文件说明
 
 
 
@@ -547,32 +329,6 @@ rosrun roborts_tracking roborts_tracking_test
 
 
 ## 启动文件说明
-
-base模块：
-
-```shell
-roslaunch roborts_bringup base.launch
-```
-
-costmap测试：
-
-```shell
-roslaunch roborts_bringup test_costmap.launch
-```
-
-启动amcl+move_base+stage仿真：
-
-```shell
-roslaunch roborts_bringup move_base_brimon.launch
-```
-
-启动stage仿真：（roborts_planning+roborts_localization）
-
-启动的节点：localization_node(定位模块)、vel_converter_node(速度转换模块)、local_planner_node(局部定位模块)、global_planner_node(全局定位模块)、laser_detection_node(激光雷达目标监测模块)、global_planner_test(可以使用rviz的2D navigation工具确定目标点并导航的节点)。（根据需要添加或者去除）
-
-```shell
-roslaunch roborts_bringup roborts_stage.launch
-```
 
 启动usb摄像头：
 
@@ -597,13 +353,6 @@ rosrun roborts_detection armor_detection_client
 
 ```shell
 roslaunch roborts_bringup armor_detection.launch
-```
-
-决策模块：
-
-```shell
-roslaunch roborts_bringup roborts_stage.launch  # 先启动仿真
-rosrun roborts_decision behavior_test_node  # 再启动决策模块
 ```
 
 
