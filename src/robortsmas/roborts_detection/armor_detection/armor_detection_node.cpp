@@ -18,6 +18,8 @@
 #include <unistd.h>
 #include "armor_detection_node.h"
 
+#include "roborts_msgs/RobotStatus.h"
+
 namespace roborts_detection {
 
 ArmorDetectionNode::ArmorDetectionNode():
@@ -39,9 +41,19 @@ ArmorDetectionNode::ArmorDetectionNode():
   as_.start();
 }
 
+
+
+
+void GetEnemyColor(const roborts_msgs::RobotStatus::ConstPtr &robot_status);
+
+
+
 ErrorInfo ArmorDetectionNode::Init()
 {
   enemy_info_pub_ = enemy_nh_.advertise<roborts_msgs::GimbalAngle>("cmd_gimbal_angle", 100);
+  // ros_robot_status_sub_ = nh_.subscribe("robot_status", 1, boost::bind(&ConstraintSet::GetEnemyColor));  // 订阅机器人状态信息
+  ros_robot_status_sub_ = enemy_nh_.subscribe("robot_status", 1, &GetEnemyColor);  // 订阅机器人状态信息
+
   ArmorDetectionAlgorithms armor_detection_param;
 
   std::string file_name = ros::package::getPath("roborts_detection") + "/armor_detection/config/armor_detection.prototxt";
@@ -90,7 +102,7 @@ void ArmorDetectionNode::ActionCB(const roborts_msgs::ArmorDetectionGoal::ConstP
   roborts_msgs::ArmorDetectionResult result;
   bool undetected_msg_published = false;
 
-  if(!initialized_){
+  if(!initialized_) {
     feedback.error_code = error_info_.error_code();
     feedback.error_msg  = error_info_.error_msg();
     as_.publishFeedback(feedback);
@@ -112,8 +124,10 @@ void ArmorDetectionNode::ActionCB(const roborts_msgs::ArmorDetectionGoal::ConstP
     default:
       break;
   }
-  ros::Rate rate(25);
+  ros::Rate rate(50);
   while(ros::ok()) {
+
+    ros::spinOnce();
 
     if(as_.isPreemptRequested()) {
       as_.setPreempted();

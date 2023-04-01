@@ -39,6 +39,7 @@
 #include "roborts_msgs/Armors.h"
 #include "roborts_msgs/Target.h"
 #include "geometry_msgs/PointStamped.h"
+#include "roborts_msgs/RobotStatus.h"
 #include <ros/time.h>
 #include <ros/duration.h>
 
@@ -266,6 +267,10 @@ class ArmorInfo {
 class ConstraintSet : public ArmorDetectionBase {
  public:
   ConstraintSet(std::shared_ptr<CVToolbox> cv_toolbox);
+
+  // void GetEnemyColor(const roborts_msgs::RobotStatus::ConstPtr &robot_status);
+
+
   /**
    * @brief Loading parameters from .prototxt file.
    */

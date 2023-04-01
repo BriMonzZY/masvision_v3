@@ -40,6 +40,8 @@
 #include "armor_detection_algorithms.h"
 #include "gimbal_control.h"
 
+#include "constraint_set/constraint_set.h"
+
 namespace roborts_detection {
 
 using roborts_common::NodeState;
@@ -107,6 +109,7 @@ class ArmorDetectionNode {
   ros::NodeHandle nh_;
   ros::NodeHandle enemy_nh_;
   ros::Publisher enemy_info_pub_;
+  ros::Subscriber ros_robot_status_sub_;
   std::shared_ptr<CVToolbox> cv_toolbox_;
   actionlib::SimpleActionServer<roborts_msgs::ArmorDetectionAction> as_;
   roborts_msgs::GimbalAngle gimbal_angle_;

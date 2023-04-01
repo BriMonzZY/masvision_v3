@@ -1,7 +1,7 @@
 camera: {
   camera_name: "usb_cam"
   camera_type: "uvc"
-  camera_path: "/dev/video0"
+  camera_path: "/dev/video2"
 
   camera_matrix {
     data: 741.74599147

@@ -30,4 +30,4 @@ armor_size {
 using_hsv: false
 enable_debug: true
 enable_neon: false
-enemy_color: BLUE
+enemy_color: RED

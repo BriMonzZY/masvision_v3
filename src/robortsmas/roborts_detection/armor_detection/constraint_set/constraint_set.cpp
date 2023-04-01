@@ -43,6 +43,26 @@ ConstraintSet::ConstraintSet(std::shared_ptr<CVToolbox> cv_toolbox):
   error_info_ = ErrorInfo(roborts_common::OK);
 }
 
+
+
+unsigned int enemy_color_from_referee;
+
+/**
+ * @brief 获取敌方颜色
+ * 
+ * @param robot_status 
+ */
+void GetEnemyColor(const roborts_msgs::RobotStatus::ConstPtr &robot_status)
+{
+  ROS_WARN("robort id : %d", robot_status->id);
+  if(robot_status->id == 3 || robot_status->id == 4 || robot_status->id == 5) {  // 红方步兵
+    enemy_color_from_referee = BLUE;
+  }
+  else if(robot_status->id == 103 || robot_status->id == 104 || robot_status->id == 105) {  // 蓝方步兵
+    enemy_color_from_referee = RED;
+  }
+}
+
 void ConstraintSet::LoadParam()
 {
   //read parameters
@@ -53,7 +73,9 @@ void ConstraintSet::LoadParam()
   ROS_ASSERT_MSG(read_state, "Cannot open %s", file_name.c_str());
 
   enable_debug_ = constraint_set_config_.enable_debug();
-  enemy_color_ = constraint_set_config_.enemy_color();
+
+  // enemy_color_ = constraint_set_config_.enemy_color();  // 设置敌方颜色
+
   using_hsv_ = constraint_set_config_.using_hsv();
 
   //armor info
@@ -100,6 +122,8 @@ ErrorInfo ConstraintSet::DetectArmor(bool &detected, cv::Point3f &target_3d)
 {
   std::vector<cv::RotatedRect> lights;
   std::vector<ArmorInfo> armors;
+
+  enemy_color_ = enemy_color_from_referee;  // 设置敌方颜色
 
   ros::Time time = ros::Time::now();
   dt_s = (time - last_time_s).toSec();
