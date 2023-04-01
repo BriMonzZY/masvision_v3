@@ -24,6 +24,10 @@
 namespace roborts_detection {
 
 double armor_distance;
+cv::Point3f target_3d_pre;
+extern double dt_s;
+cv::Point3f postion_last;
+double last_yaw;
 
 
 void GimbalContrl::Init(float x,float y,float z,float pitch,float yaw, float init_v, float init_k) {
@@ -64,7 +68,9 @@ float GimbalContrl::GetPitch(float x, float y, float v) {
 
 }
 
-void GimbalContrl::Transform(cv::Point3f &postion, float &pitch, float &yaw) {
+void GimbalContrl::Transform(cv::Point3f &postion, float &pitch, float &yaw)
+// void GimbalContrl::Transform(cv::Point3f &postion, cv::Point3f &postion_pre, float &pitch, float &yaw)
+{
   double distance = armor_distance;
   ROS_WARN("distance : %.2f", distance);
   // ROS_WARN("positionx : %.2f positiony : %.2f positionz : %.2f", postion.x, postion.y, postion.z);
@@ -72,18 +78,33 @@ void GimbalContrl::Transform(cv::Point3f &postion, float &pitch, float &yaw) {
   // pitch = -GetPitch((postion.z + offset_.z) / 100, -(postion.y + offset_.y) / 100, 15) + (float)(offset_pitch_ * 3.1415926535 / 180);
   // pitch = -GetPitch((postion.z + offset_.z) / 100, -(postion.y + offset_.y) / 100, init_v_) + (float)(offset_pitch_ * 3.1415926535 / 180);
 
-  // 记得加入重力补偿（或者角度补偿） minipc上的那版
+  // 记得加入重力补偿（或者角度补偿）
   double tan_pitch = postion.y / sqrt(postion.x * postion.x + postion.z * postion.z);
 	pitch = -atan(tan_pitch);  // pitch = -atan(tan_pitch) * 180 / CV_PI;
   pitch += offset_pitch_ / 180 * CV_PI; // 线性角度偏移
 
   // pitch = atan2(0.6, distance/1000);// / 3.1415926535 * 180;
-  ROS_WARN("pitch : %.2f", pitch);
+  ROS_WARN("pitch : %.4f", pitch);
       
   //yaw positive direction :anticlockwise
   yaw = -(float) (atan2(postion.x + offset_.x, postion.z + offset_.z)) + (float)(offset_yaw_ * 3.1415926535 / 180);
 
-  ROS_WARN("yaw : %.2f", yaw);
+  // 卡尔曼滤波预测
+  // float yaw_pre;
+  // yaw_pre = -(float) (atan2(target_3d_pre.x + offset_.x, target_3d_pre.z + offset_.z)) + (float)(offset_yaw_ * 3.1415926535 / 180);
+
+  ROS_WARN("yaw : %.4f", yaw);
+  // ROS_WARN("yaw pre : %.4f", yaw_pre);
+  // ROS_WARN("yaw diff : %.4f", yaw_pre - yaw);
+  // yaw = yaw_pre;
+
+  // 速度预测
+  // double v_x = (postion.x-postion_last.x)/dt_s;
+  // double v_y = (postion.y-postion_last.y)/dt_s;
+  // double v_z = (postion.z-postion_last.z)/dt_s;
+  // ROS_WARN("v : %.4f %.4f %.4f", v_x, v_y, v_z);
+  // yaw = -(float) (atan2(postion.x + v_x*12*dt_s + offset_.x, postion.z  + v_z*dt_s*12 + offset_.z)) + (float)(offset_yaw_ * 3.1415926535 / 180);
+  // postion_last = postion;
 }
 
 } // roborts_detection

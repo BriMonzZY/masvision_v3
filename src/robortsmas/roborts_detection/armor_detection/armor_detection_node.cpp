@@ -64,6 +64,10 @@ ErrorInfo ArmorDetectionNode::Init()
   // create image receiver
   cv_toolbox_ =std::make_shared<CVToolbox>(armor_detection_param.camera_name());
   // create armor detection algorithm
+  // armor_detector_ = roborts_common::AlgorithmFactory<ArmorDetectionBase,std::shared_ptr<CVToolbox>>::CreateAlgorithm
+  //     (selected_algorithm, cv_toolbox_);
+
+  // ArmorProcessor armorprocessor_();
   armor_detector_ = roborts_common::AlgorithmFactory<ArmorDetectionBase,std::shared_ptr<CVToolbox>>::CreateAlgorithm
       (selected_algorithm, cv_toolbox_);
 

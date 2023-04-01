@@ -1,0 +1,11 @@
+0.7
+2020.2
+Oct 19 2021
+02:56:52
+/home/brimon/Vivado/eda_course_labs/proj6/sim/uart_transmitter_tb.v,1680242788,verilog,,,,uart_transmitter_tb,,,,,,,,
+/home/brimon/Vivado/eda_course_labs/proj6/src/edge_detector2.v,1673328212,verilog,,,,edge_detector2,,,,,,,,
+/home/brimon/Vivado/eda_course_labs/proj6/src/synchronizer.v,1678363685,verilog,,,,synchronizer,,,,,,,,
+/home/brimon/Vivado/eda_course_labs/proj6/src/uart.v,1680140573,verilog,,,,uart,,,,,,,,
+/home/brimon/Vivado/eda_course_labs/proj6/src/uart_receiver.v,1680172138,verilog,,,,uart_receiver,,,,,,,,
+/home/brimon/Vivado/eda_course_labs/proj6/src/uart_top.v,1680242976,verilog,,,,uart_top,,,,,,,,
+/home/brimon/Vivado/eda_course_labs/proj6/src/uart_transmitter.v,1680244398,verilog,,,,uart_transmitter,,,,,,,,

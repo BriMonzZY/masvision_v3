@@ -33,6 +33,15 @@
 
 #include "proto/constraint_set.pb.h"
 #include "constraint_set.h"
+
+#include <Eigen/Dense>
+#include "roborts_msgs/Armor.h"
+#include "roborts_msgs/Armors.h"
+#include "roborts_msgs/Target.h"
+#include "geometry_msgs/PointStamped.h"
+#include <ros/time.h>
+#include <ros/duration.h>
+
 namespace roborts_detection {
 
 using roborts_common::ErrorCode;
@@ -103,6 +112,138 @@ struct LightInfo {
   std::vector<cv::Point2f> vertices_;
 };
 
+
+
+struct KalmanFilterMatrices
+{
+  Eigen::MatrixXd F;  // state transition matrix
+  Eigen::MatrixXd H;  // measurement matrix
+  Eigen::MatrixXd Q;  // process noise covariance matrix
+  Eigen::MatrixXd R;  // measurement noise covariance matrix
+  Eigen::MatrixXd P;  // error estimate covariance matrix
+};
+
+class KalmanFilter
+{
+  public:
+    explicit KalmanFilter(const KalmanFilterMatrices & matrices);
+
+    // Initialize the filter with a guess for initial states.
+    void init(const Eigen::VectorXd & x0);
+
+    // Computes a predicted state
+    // Eigen::MatrixXd predict(const Eigen::MatrixXd & F);
+    Eigen::MatrixXd predict(const Eigen::MatrixXd & F_);
+
+    // Update the estimated state based on measurement
+    Eigen::MatrixXd update(const Eigen::VectorXd & z);
+
+  private:
+    // Invariant matrices
+    Eigen::MatrixXd F, H, Q, R;
+    // Eigen::MatrixXd H, Q, R;
+    // Eigen::Matrix6d F;
+
+    // Priori error estimate covariance matrix
+    Eigen::MatrixXd P_pre;
+    // Posteriori error estimate covariance matrix
+    Eigen::MatrixXd P_post;
+
+    // Kalman gain
+    Eigen::MatrixXd K;
+
+    // System dimensions
+    int n;
+
+    // N-size identity
+    Eigen::MatrixXd I;
+
+    // Predicted state
+    Eigen::VectorXd x_pre;
+    // Updated state
+    Eigen::VectorXd x_post;
+};
+
+
+
+
+class Tracker
+{
+  public:
+    Tracker(
+      const KalmanFilterMatrices & kf_matrices, double max_match_distance, int tracking_threshold,
+      int lost_threshold);
+
+    using Armors = roborts_msgs::Armors;
+    using Armor = roborts_msgs::Armor;
+
+    // void init(const Armors::SharedPtr & armors_msg);
+    void init(const Armors * armors_msg);
+
+    // void update(const Armors::SharedPtr & armors_msg, const double & dt);
+    void update(Armors * armors_msg, const double & dt);
+
+    enum State {
+      LOST,
+      DETECTING,
+      TRACKING,
+      TEMP_LOST,
+    } tracker_state;
+
+    char tracking_id;
+    Eigen::VectorXd target_state;
+
+  private:
+    KalmanFilterMatrices kf_matrices_;
+    std::unique_ptr<KalmanFilter> kf_;
+
+    Eigen::Vector3d tracking_velocity_;
+
+    Eigen::Vector3d velocity_;
+    Armors * armors_msg_last;
+
+    double max_match_distance_;
+
+    int tracking_threshold_;
+    int lost_threshold_;
+
+    int detect_count_;
+    int lost_count_;
+};
+
+class ArmorProcessor
+{
+public:
+  using Armors = roborts_msgs::Armors;
+  using Armor = roborts_msgs::Armor;
+
+  explicit ArmorProcessor();
+
+  // void armorsCallback(const Armors * armors_msg);
+  roborts_msgs::Target armorsCallback(Armors * armors_msg);
+
+private:
+  
+
+  // void publishMarkers(const auto_aim_interfaces::msg::Target & target_msg);
+
+  // Last time received msg
+  ros::Time last_time_;
+
+  // Initial KF matrices
+  KalmanFilterMatrices kf_matrices_;
+  double dt_;
+  // ros::Duration dt_;
+
+  // Armor tracker
+  std::unique_ptr<Tracker> tracker_;
+};
+
+
+
+
+
+
 /**
  *  This class describes the armor information, including maximum bounding box, vertex, standard deviation.
  */
@@ -135,6 +276,7 @@ class ConstraintSet : public ArmorDetectionBase {
    * @param rotation Rotation information of the armor relative to the camera.
    */
   ErrorInfo DetectArmor(bool &detected, cv::Point3f &target_3d) override;
+  // ErrorInfo DetectArmor(bool &detected, cv::Point3f &target_3d, cv::Point3f &target_3d_pre) override;
   /**
    * @brief Detecting lights on the armors.
    * @param src Input image
@@ -191,6 +333,8 @@ class ConstraintSet : public ArmorDetectionBase {
   void SignalFilter(double &new_num, double &old_num,unsigned int &filter_count, double max_diff);
 
   void SetThreadState(bool thread_state) override;
+
+  float calculateDistanceToCenter(const cv::Point2f & image_point);
   /**
    * @brief Destructor
    */
@@ -253,11 +397,20 @@ class ConstraintSet : public ArmorDetectionBase {
   // distance
   // double armor_distance;
 
+  // ArmorProcessor *armorprocessor;
+  std::unique_ptr<ArmorProcessor> armorprocessor_;
+
   //ros
   ros::NodeHandle nh;
 };
 
 roborts_common::REGISTER_ALGORITHM(ArmorDetectionBase, "constraint_set", ConstraintSet, std::shared_ptr<CVToolbox>);
+
+
+
+
+
+
 
 } //namespace roborts_detection
 

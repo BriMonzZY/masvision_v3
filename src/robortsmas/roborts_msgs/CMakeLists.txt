@@ -30,6 +30,10 @@ add_message_files(
     ArmorPos.msg
     ArmorsPos.msg
     AllyPose.msg
+
+    Armor.msg
+    Armors.msg
+    Target.msg
 )
 
 add_message_files(

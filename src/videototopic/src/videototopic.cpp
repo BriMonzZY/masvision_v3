@@ -12,7 +12,7 @@ using namespace cv;
 struct Config {
   void GetParam() {
     ros::NodeHandle nh;
-    nh.param<std::string>("path", path, "/home/brimon/rm_ws/src/videototopic/001.avi");
+    nh.param<std::string>("path", path, "~/masvision_v2/src/videototopic/001.avi");
 	nh.param<std::string>("cam_name", cam_name, "usb_cam");
   }
   std::string path;
@@ -72,9 +72,9 @@ int main(int argc, char **argv)
 	sensor_msgs::CameraInfoPtr camera_info_dyn(new sensor_msgs::CameraInfo());
 	camera_info_dyn = getCameraInfo();
 
-	ros::Rate loop_rate(30);  // update rate
+	ros::Rate loop_rate(40);  // update rate
 
-	VideoCapture cap(config.path);  //open video from the path
+	cv::VideoCapture cap(config.path);  //open video from the path
 	if(!cap.isOpened()){
 		ROS_ERROR("open video failed!");
 		return -1;

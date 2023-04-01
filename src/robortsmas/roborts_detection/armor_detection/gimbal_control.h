@@ -68,6 +68,7 @@ class GimbalContrl
    * @param yaw Input and output actual yaw angle
    */
   void Transform(cv::Point3f &postion,float &pitch,float &yaw);
+  // void Transform(cv::Point3f &postion, cv::Point3f &postion_pre, float &pitch, float &yaw);
 
  private:
   //! Transformation matrix between camera coordinate system and gimbal coordinate system.

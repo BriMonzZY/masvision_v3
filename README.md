@@ -336,7 +336,7 @@ rosrun roborts_tracking roborts_tracking_test
 roslaunch roborts_bringup usb_cam.launch
 ```
 
-视频发布话题：（注意修改rm_ws/src/videototopic/config/videototopic.yaml中的视频路径）
+视频发布话题：（注意修改/config/videototopic.yaml中的视频路径）
 
 ```shell
 roslaunch roborts_bringup image_publisher.launch

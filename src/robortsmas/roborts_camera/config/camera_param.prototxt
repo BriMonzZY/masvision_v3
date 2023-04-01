@@ -1,7 +1,7 @@
 camera: {
   camera_name: "usb_cam"
   camera_type: "uvc"
-  camera_path: "/dev/video0"
+  camera_path: "/dev/video2"
 
   camera_matrix {
     data: 741.74599147
@@ -31,7 +31,7 @@ camera: {
     height_offset: 0
   }
 
-  fps: 300
+  fps: 330
   auto_exposure: 1
   exposure_value: 70
   exposure_time: 10
