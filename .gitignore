@@ -1,0 +1,14 @@
+*.*
+*
+!*/
+!/src/**
+!.gitignore
+!*.c
+!*.cpp
+!*.h
+!auto_start.sh
+!*.md
+!*.pdf
+/build
+/devel
+
