@@ -6,6 +6,6 @@
     <node pkg="roborts_detection" type="armor_detection_client" name="armor_detection_client" output="screen" respawn="true" />
 
     <!-- usb cam -->
-    <include file="$(find roborts_bringup)/launch/usb_cam.launch" />
+    <!-- <include file="$(find roborts_bringup)/launch/usb_cam.launch" /> -->
 
 </launch>

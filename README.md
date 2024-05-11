@@ -287,7 +287,7 @@ roborts_bringup的usb_cam.launch文件里修改标定文件的路径
 使用：
 
 ```
- roslaunch roborts_bringup image_publisher.launch
+roslaunch roborts_bringup image_publisher.launch
 ```
 
 即可将视频发布到指定的topic
