@@ -1,0 +1,41 @@
+width: 1440             #图像宽度
+height: 540            #图像高度
+Offset_x: 0             #X方向偏置
+Offset_y: 540             #Y方向偏置
+
+PixelFormat: 12         #像素格式，12: BayerRG8
+
+FrameRateEnable: true   #使能 
+FrameRate: 100           #帧率
+
+ExposureTime: 2000      #曝光时间
+ExposureAuto: false
+AutoExposureTimeLowerLimit: 100
+AutoExposureTimeUpperLimit: 16777
+
+BalanceWhiteAuto: 1
+
+Brightness: 100
+
+GammaEnable: true
+GammaSelector: 1        #1: User
+Gamma: 0.7              #伽马因子
+
+GainAuto: 2             #亮度的固定增益
+
+CalibrateEnable: false
+
+ResizeEnable: false
+DestinationHeight: 640
+DestinationWidth: 640
+
+# ImageCompressionMode: 1
+# ImageCompressionQuality: 50
+
+TriggerMode: 0
+
+# hikrobot_camera:
+#   rgb:
+#     compressed:
+#       format: "png"
+#       png_level: 100
