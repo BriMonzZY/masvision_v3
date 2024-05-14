@@ -196,8 +196,8 @@ void ArmorDetectionNode::ExecuteLoop() {
 
         gimbal_angle_.yaw_mode = true;
         gimbal_angle_.pitch_mode = false;
-        gimbal_angle_.yaw_angle = yaw * 0.7;
-        gimbal_angle_.pitch_angle = pitch;
+        gimbal_angle_.yaw_angle = yaw * 0.3; // change the coefficient
+        gimbal_angle_.pitch_angle = -pitch; // pitch fanxiang
 
         std::lock_guard<std::mutex> guard(mutex_);
         undetected_count_ = undetected_armor_delay_;

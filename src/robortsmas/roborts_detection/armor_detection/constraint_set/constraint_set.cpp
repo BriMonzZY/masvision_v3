@@ -74,7 +74,7 @@ void ConstraintSet::LoadParam()
 
   enable_debug_ = constraint_set_config_.enable_debug();
 
-  // enemy_color_ = constraint_set_config_.enemy_color();  // 设置敌方颜色
+  enemy_color_ = constraint_set_config_.enemy_color();  // 设置敌方颜色
 
   using_hsv_ = constraint_set_config_.using_hsv();
 
@@ -124,7 +124,7 @@ ErrorInfo ConstraintSet::DetectArmor(bool &detected, cv::Point3f &target_3d)
   std::vector<ArmorInfo> armors;
 
   // enemy_color_ = enemy_color_from_referee;  // 设置敌方颜色
-  enemy_color_ = RED;  // 设置敌方颜色
+  // enemy_color_ = RED;  // 设置敌方颜色
 
   ros::Time time = ros::Time::now();
   dt_s = (time - last_time_s).toSec();
