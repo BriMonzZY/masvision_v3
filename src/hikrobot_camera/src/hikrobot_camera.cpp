@@ -306,12 +306,15 @@ namespace camera {
         }
         else
         {
-            if(calibrate_enable_) {
-                this->undistort(camera::frame, image);
-            }
-            else {
-                image = camera::frame;
-            }
+            // FIXME
+            // if(calibrate_enable_) {
+            //     this->undistort(camera::frame, image);
+            // }
+            // else {
+            //     image = camera::frame;
+            // }
+            image = camera::frame;
+            
             if(resize_enable_) {
                 image_resize(camera::frame, image);
             }

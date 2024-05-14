@@ -181,10 +181,14 @@ ErrorInfo ConstraintSet::DetectArmor(bool &detected, cv::Point3f &target_3d)
     cv::waitKey(1);
   }
 
+  ros::Time start = ros::Time::now();
   DetectLights(src_img_, lights);  // 灯条检测
   FilterLights(lights);  // 滤除不符合特征的灯条
   PossibleArmors(lights, armors);  // 检测可能的装甲板
   FilterArmors(armors); // 滤除不符合特征的装甲板
+  ros::Time end = ros::Time::now();
+  ros::Duration d3(end - start);
+  std::cout << "TIME in ms: " << d3 * 1000 << std::endl;
 
 
   roborts_msgs::Armors armors_;
