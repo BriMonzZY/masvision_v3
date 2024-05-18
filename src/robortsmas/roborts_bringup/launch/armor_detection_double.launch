@@ -1,6 +1,5 @@
 <launch>
-
-    <group ns="camera1">
+    <group ns="head1">
         <master auto="start"/>
 
         <node pkg="roborts_detection" type="armor_detection_node" name="armor_detection_node" output="screen" respawn="true" />
@@ -8,14 +7,12 @@
         <node pkg="roborts_detection" type="armor_detection_client" name="armor_detection_client" output="screen" respawn="true" />
     </group>
 
-    <group ns="camera2">
+    <group ns="head2">
         <master auto="start"/>
 
         <node pkg="roborts_detection" type="armor_detection_node" name="armor_detection_node" output="screen" respawn="true" />
 
         <node pkg="roborts_detection" type="armor_detection_client" name="armor_detection_client" output="screen" respawn="true" />
     </group>
-
-    
 
 </launch>

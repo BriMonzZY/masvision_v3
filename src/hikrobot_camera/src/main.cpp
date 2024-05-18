@@ -45,15 +45,18 @@ int main(int argc, char **argv)
     //********** rosnode init **********/
     ros::init(argc, argv, "hikrobot_camera");
     ros::NodeHandle hikrobot_camera;
-    camera::Camera MVS_cap(hikrobot_camera);
+    int camera_num = 1;
+    hikrobot_camera.getParam("camera_num", camera_num);
+    ROS_INFO("camera num is .......... %d", camera_num);
+    camera::Camera MVS_cap(hikrobot_camera, camera_num);
     //********** rosnode init **********/
     image_transport::ImageTransport main_cam_image(hikrobot_camera);
     // 用image_transport::CameraPublisher发布的话题中compressed无法订阅
     // image_transport::CameraPublisher image_pub = main_cam_image.advertiseCamera("/hikrobot_camera/rgb", 1000);
     // 目前实测使用image_transport::Publisher发布的话题中compressed仍然无法订
     // *20220912 多次验证后，目前已可订阅compressed*
-    image_transport::Publisher image_pub = main_cam_image.advertise("/hikrobot_camera/image_raw", 1000);
-    ros::Publisher camera_info_pub = hikrobot_camera.advertise<sensor_msgs::CameraInfo>("/hikrobot_camera/camera_info", 1000);
+    image_transport::Publisher image_pub = main_cam_image.advertise("hikrobot_camera/image_raw", 1000);
+    ros::Publisher camera_info_pub = hikrobot_camera.advertise<sensor_msgs::CameraInfo>("hikrobot_camera/camera_info", 1000);
 
     // TODO Use threads to do dynamic reconfigure
     // dynamic_reconfigure::Server<hikrobot_camera::cameraConfig> server;

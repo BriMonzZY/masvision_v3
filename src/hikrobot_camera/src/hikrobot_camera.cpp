@@ -15,7 +15,7 @@ namespace camera {
     int height;
     int width;
 
-    Camera::Camera(ros::NodeHandle &node)
+    Camera::Camera(ros::NodeHandle &node, int camera_num)
     {
         handle_ = NULL;
         cameraMatrix_ = cv::Mat::zeros(3, 3, CV_64F);
@@ -113,7 +113,8 @@ namespace camera {
 
         //********** 选择设备并创建句柄 *************************/
 
-        nRet_ = MV_CC_CreateHandle(&handle_, stDeviceList.pDeviceInfo[0]);
+        // nRet_ = MV_CC_CreateHandle(&handle_, stDeviceList.pDeviceInfo[0]);c
+        nRet_ = MV_CC_CreateHandle(&handle_, stDeviceList.pDeviceInfo[camera_num-1]);
 
         if (MV_OK != nRet_)
         {
