@@ -15,7 +15,7 @@ namespace camera {
     int height;
     int width;
 
-    Camera::Camera(ros::NodeHandle &node, int camera_num)
+    Camera::Camera(ros::NodeHandle &node, std::string camera_num)
     {
         handle_ = NULL;
         cameraMatrix_ = cv::Mat::zeros(3, 3, CV_64F);
@@ -92,6 +92,7 @@ namespace camera {
             exit(-1);
         }
         unsigned int nIndex = 0;
+        int camera_index = 0;
         if (stDeviceList.nDeviceNum > 0)
         {
             for (int i = 0; i < stDeviceList.nDeviceNum; i++)
@@ -103,6 +104,10 @@ namespace camera {
                     break;
                 }
                 PrintDeviceInfo(pDeviceInfo);
+                if(camera_num==reinterpret_cast<char *>(pDeviceInfo->SpecialInfo.stUsb3VInfo.chUserDefinedName)) {
+                    camera_index = i;
+                    printf("**** camera user name:%s  camera index = %d ****\n",(pDeviceInfo->SpecialInfo.stUsb3VInfo.chUserDefinedName), camera_index);
+                }
             }
         }
         else
@@ -113,8 +118,8 @@ namespace camera {
 
         //********** 选择设备并创建句柄 *************************/
 
-        // nRet_ = MV_CC_CreateHandle(&handle_, stDeviceList.pDeviceInfo[0]);c
-        nRet_ = MV_CC_CreateHandle(&handle_, stDeviceList.pDeviceInfo[camera_num-1]);
+        // nRet_ = MV_CC_CreateHandle(&handle_, stDeviceList.pDeviceInfo[0]);
+        nRet_ = MV_CC_CreateHandle(&handle_, stDeviceList.pDeviceInfo[camera_index]);
 
         if (MV_OK != nRet_)
         {

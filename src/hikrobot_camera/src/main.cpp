@@ -45,9 +45,9 @@ int main(int argc, char **argv)
     //********** rosnode init **********/
     ros::init(argc, argv, "hikrobot_camera");
     ros::NodeHandle hikrobot_camera;
-    int camera_num = 1;
+    std::string camera_num = "1";
     hikrobot_camera.getParam("camera_num", camera_num);
-    ROS_INFO("camera num is .......... %d", camera_num);
+    printf("camera num is .......... %s\n", camera_num);
     camera::Camera MVS_cap(hikrobot_camera, camera_num);
     //********** rosnode init **********/
     image_transport::ImageTransport main_cam_image(hikrobot_camera);

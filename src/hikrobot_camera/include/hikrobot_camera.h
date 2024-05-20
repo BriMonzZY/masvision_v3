@@ -28,7 +28,7 @@ namespace camera
     {
     public:
         //********** 构造函数  ****************************/
-        Camera(ros::NodeHandle &node, int camera_num);
+        Camera(ros::NodeHandle &node, std::string camera_num);
         //********** 析构函数  ****************************/
         ~Camera();
         //********** 原始信息转换线程 **********************/
