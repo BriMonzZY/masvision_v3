@@ -206,14 +206,14 @@ ErrorInfo ConstraintSet::DetectArmor(bool &detected, cv::Point3f &target_3d)
     CalcControlInfo(final_armor, target_3d);  // PnP解算
 
     // 卡尔曼滤波预测
-    // roborts_msgs::Armor armor_msg;
-    // armors_.header.stamp = ros::Time::now();
-    // armor_msg.number = 3;
-    // armor_msg.distance_to_image_center = calculateDistanceToCenter(final_armor.rect.center);
-    // armor_msg.position.x = target_3d.x;
-    // armor_msg.position.y = target_3d.y;
-    // armor_msg.position.z = target_3d.z;
-    // armors_.armors.emplace_back(armor_msg);
+    roborts_msgs::Armor armor_msg;
+    armors_.header.stamp = ros::Time::now();
+    armor_msg.number = 3;
+    armor_msg.distance_to_image_center = calculateDistanceToCenter(final_armor.rect.center);
+    armor_msg.position.x = target_3d.x;
+    armor_msg.position.y = target_3d.y;
+    armor_msg.position.z = target_3d.z;
+    armors_.armors.emplace_back(armor_msg);
     cv::circle(src_img_, cv::Point(armors[0].rect.center.x, armors[0].rect.center.y), 10, cv::Scalar(255, 0, 0), 3, 8);
   }
   else {
@@ -224,11 +224,16 @@ ErrorInfo ConstraintSet::DetectArmor(bool &detected, cv::Point3f &target_3d)
   }
 
   // 卡尔曼滤波预测
-  // target_msg = armorprocessor_->armorsCallback(&armors_);
-  // target_3d_pre.x = target_msg.position.x;
-  // target_3d_pre.y = target_msg.position.y;
-  // target_3d_pre.z = target_msg.position.z;
-  // ROS_WARN("%.2f %.2f %.2f", target_msg.position.x, target_msg.position.y, target_msg.position.z);
+  target_msg = armorprocessor_->armorsCallback(&armors_);
+  target_3d_pre.x = target_msg.position.x;
+  target_3d_pre.y = target_msg.position.y;
+  target_3d_pre.z = target_msg.position.z;
+  ROS_WARN("target 3d : %.2f %.2f %.2f", target_3d.x, target_3d.y, target_3d.z);
+  ROS_WARN("Kalman position diff : %.2f %.2f %.2f", target_msg.position.x-target_3d.x, target_msg.position.y-target_3d.y, target_msg.position.z-target_3d.z);
+  target_3d.x = 2*target_3d.x-target_3d_pre.x;//target_3d_pre.x;
+  target_3d.y = 2*target_3d.y-target_3d_pre.y;//target_3d_pre.y;
+  target_3d.z = 2*target_3d.z-target_3d_pre.z;//target_3d_pre.z;
+  // ROS_WARN("Kalman position : %.2f %.2f %.2f", target_msg.position.x, target_msg.position.y, target_msg.position.z);
   // cv::circle(src_img_, cv::Point(armors[0].rect.center.x, armors[0].rect.center.y), 10, cv::Scalar(0, 0, 255), 3, 8);
 
 
@@ -640,6 +645,7 @@ void ConstraintSet::SetThreadState(bool thread_state) {
 
 
 /************************************************************************** KalmanFilter *****************************************************************************************/
+/************************************************************************** From rm_auto_aim by chenjun **************************************************************************/
 
 KalmanFilter::KalmanFilter(const KalmanFilterMatrices & matrices)
 : F(matrices.F),
@@ -658,11 +664,11 @@ void KalmanFilter::init(const Eigen::VectorXd & x0) { x_post = x0; }
 
 Eigen::MatrixXd KalmanFilter::predict(const Eigen::MatrixXd & F)
 {
-  ROS_WARN("in predict");
+  ROS_WARN("in Kalman predict");
   this->F = F;
 
-  std::cout << this->F << std::endl;
-  std::cout << x_post << std::endl;
+  // std::cout << this->F << std::endl;
+  // std::cout << x_post << std::endl;
 
   x_pre = F * x_post;
   P_pre = F * P_post * F.transpose() + Q; // 转置
@@ -677,7 +683,7 @@ Eigen::MatrixXd KalmanFilter::predict(const Eigen::MatrixXd & F)
 
 Eigen::MatrixXd KalmanFilter::update(const Eigen::VectorXd & z)
 {
-  ROS_WARN("in update");
+  ROS_WARN("in Kalman update");
   K = P_pre * H.transpose() * (H * P_pre * H.transpose() + R).inverse();
   x_post = x_pre + K * (z - H * x_pre);
   P_post = (I - K * H) * P_pre;
@@ -686,9 +692,11 @@ Eigen::MatrixXd KalmanFilter::update(const Eigen::VectorXd & z)
 }
 
 
+/************************************************************************** End of KalmanFilter *****************************************************************************************/
+/************************************************************************** From rm_auto_aim by chenjun **************************************************************************/
 
-
-
+/************************************************************************** Tracker *****************************************************************************************/
+/************************************************************************** From rm_auto_aim by chenjun **************************************************************************/
 
 Tracker::Tracker(
   const KalmanFilterMatrices & kf_matrices, double max_match_distance, int tracking_threshold,
@@ -838,15 +846,11 @@ void Tracker::update(Armors * armors_msg, const double & dt)
   }
 }
 
+/************************************************************************** End of Tracker *****************************************************************************************/
+/************************************************************************** From rm_auto_aim by chenjun **************************************************************************/
 
-
-
-
-
-
-
-
-
+/************************************************************************** Armor Processor *****************************************************************************************/
+/************************************************************************** From rm_auto_aim by chenjun **************************************************************************/
 
 
 ArmorProcessor::ArmorProcessor()
@@ -891,9 +895,9 @@ ArmorProcessor::ArmorProcessor()
   kf_matrices_ = KalmanFilterMatrices{f, h, q, r, p};
 
   // Tracker
-  double max_match_distance = 20;
-  int tracking_threshold = 5;
-  int lost_threshold = 5;
+  double max_match_distance = 500;
+  int tracking_threshold = 7;
+  int lost_threshold = 7;
   tracker_ = std::make_unique<Tracker>(kf_matrices_, max_match_distance, tracking_threshold, lost_threshold);  // 实例化tracker
 }
 
@@ -956,7 +960,7 @@ roborts_msgs::Target ArmorProcessor::armorsCallback(Armors * armors_msg)
 
     // 计算dt Set dt
     dt_ = (time - last_time_).toSec();
-    ROS_WARN("dt_ : %.4f", dt_);
+    ROS_WARN("in armorsCallback : dt_ : %.4f", dt_);
     // Update state
     tracker_->update(armors_msg, dt_);
     ROS_WARN("tracker updated");
@@ -976,8 +980,8 @@ roborts_msgs::Target ArmorProcessor::armorsCallback(Armors * armors_msg)
     target_msg.velocity.z = tracker_->target_state(5);
   }
 
-  ROS_WARN("target_msg.tracking : %d", target_msg.tracking);
-  ROS_WARN("tracker_state : %d", tracker_->tracker_state);
+  ROS_WARN("in armorsCallback : target_msg.tracking : %d", target_msg.tracking);
+  ROS_WARN("in armorsCallback : tracker_state : %d", tracker_->tracker_state);
 
 
   last_time_ = time;
@@ -985,18 +989,8 @@ roborts_msgs::Target ArmorProcessor::armorsCallback(Armors * armors_msg)
   return target_msg;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
+/************************************************************************** End of Armor Processor *****************************************************************************************/
+/************************************************************************** From rm_auto_aim by chenjun **************************************************************************/
 
 
 ConstraintSet::~ConstraintSet() {

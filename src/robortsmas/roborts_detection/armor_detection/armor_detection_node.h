@@ -41,6 +41,8 @@
 #include "gimbal_control.h"
 
 #include "constraint_set/constraint_set.h"
+#include "roborts_msgs/FricWhl.h"
+#include "roborts_msgs/ShootCmd.h"
 
 namespace roborts_detection {
 
@@ -105,11 +107,17 @@ class ArmorDetectionNode {
   bool detected_enemy_;
   unsigned long demensions_;
 
+  double yaw_tmp, pitch_tmp;
+  bool yaw_flag, pitch_flag;
+
   //ROS
   ros::NodeHandle nh_;
   ros::NodeHandle enemy_nh_;
   ros::Publisher enemy_info_pub_;
   ros::Subscriber ros_robot_status_sub_;
+  ros::ServiceClient shoot_client;
+  ros::ServiceClient fric_wheel_client;
+  
   std::shared_ptr<CVToolbox> cv_toolbox_;
   actionlib::SimpleActionServer<roborts_msgs::ArmorDetectionAction> as_;
   roborts_msgs::GimbalAngle gimbal_angle_;

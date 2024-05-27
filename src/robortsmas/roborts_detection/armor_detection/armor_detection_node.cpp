@@ -22,6 +22,12 @@
 
 namespace roborts_detection {
 
+typedef enum: uint8_t {
+  SHOOT_STOP = 0,
+  SHOOT_ONCE,
+  SHOOT_CONTINUOUS,
+} shoot_cmd_;
+
 ArmorDetectionNode::ArmorDetectionNode():
     node_state_(roborts_common::IDLE),
     demensions_(3),
@@ -53,6 +59,9 @@ ErrorInfo ArmorDetectionNode::Init()
   enemy_info_pub_ = enemy_nh_.advertise<roborts_msgs::GimbalAngle>("cmd_gimbal_angle", 100);
   // ros_robot_status_sub_ = nh_.subscribe("robot_status", 1, boost::bind(&ConstraintSet::GetEnemyColor));  // 订阅机器人状态信息
   ros_robot_status_sub_ = enemy_nh_.subscribe("robot_status", 1, &GetEnemyColor);  // 订阅机器人状态信息
+  fric_wheel_client = enemy_nh_.serviceClient<roborts_msgs::FricWhl>("cmd_fric_wheel");  // service client
+  shoot_client = enemy_nh_.serviceClient<roborts_msgs::ShootCmd>("cmd_shoot");  // service client
+
 
   ArmorDetectionAlgorithms armor_detection_param;
 
@@ -180,6 +189,8 @@ void ArmorDetectionNode::ExecuteLoop() {
   while(running_) {
     usleep(1);
     if (node_state_ == NodeState::RUNNING) {
+      roborts_msgs::ShootCmd ShootCmd_;
+      roborts_msgs::FricWhl FricWhl_;
       cv::Point3f target_3d;
       ErrorInfo error_info = armor_detector_->DetectArmor(detected_enemy_, target_3d);
       {
@@ -202,6 +213,24 @@ void ArmorDetectionNode::ExecuteLoop() {
         std::lock_guard<std::mutex> guard(mutex_);
         undetected_count_ = undetected_armor_delay_;
         PublishMsgs();
+
+        // open fricwhl
+        FricWhl_.request.open = true;
+        fric_wheel_client.call(FricWhl_);  // 检测到目标就开启摩擦轮
+
+        if(fabs(yaw) <= 45.0/180*CV_PI) {  // 目标yaw偏差在30度以内就开启拨弹盘
+          // open shoot
+          ShootCmd_.request.mode = SHOOT_CONTINUOUS;
+          ShootCmd_.request.number = 0;
+          shoot_client.call(ShootCmd_);
+        }
+        else {
+          // close shoot
+          ShootCmd_.request.mode = SHOOT_STOP;
+          shoot_client.call(ShootCmd_);
+        }
+
+
       } else if(undetected_count_ != 0) {
 
         gimbal_angle_.yaw_mode = true;
@@ -211,6 +240,39 @@ void ArmorDetectionNode::ExecuteLoop() {
 
         undetected_count_--;
         PublishMsgs();
+      }
+      else {
+#if 1
+        if(1) {
+          // yaw
+          if(yaw_flag == 0 && yaw_tmp < 20.0/180*3.14) {
+            yaw_tmp += 0.4/180*3.14;
+          }
+          else if(yaw_tmp >= 20.0/180*3.14) yaw_flag = 1;
+          if(yaw_flag == 1 && yaw_tmp > -20.0/180*3.14) {
+            yaw_tmp -= 0.4/180*3.14;
+          }
+          else if(yaw_tmp <= -20.0/180*3.14) yaw_flag = 0;
+        }
+        // roborts_msgs::GimbalAngle gimbal_angle;
+        
+        // pitch
+        if(pitch_flag == 0 && pitch_tmp < 19.0/180*3.14) {
+          pitch_tmp += 0.9/180*3.14;
+        }
+        else if(pitch_tmp >= 19.0/180*3.14) pitch_flag = 1;
+        if(pitch_flag == 1 && pitch_tmp > -17.0/180*3.14) {
+          pitch_tmp -= 0.9/180*3.14;
+        }
+        else if(pitch_tmp <= -17.0/180*3.14) pitch_flag = 0;
+        
+        gimbal_angle_.yaw_mode = 0;  // pitch_mode==1使用encoder控制yaw yaw_mode==1使用相对控制
+        gimbal_angle_.pitch_mode = 0;
+        gimbal_angle_.yaw_angle = yaw_tmp;
+        gimbal_angle_.pitch_angle = pitch_tmp;
+        ROS_WARN("find mode : pitch : %.2f  yaw : %.2f", pitch_tmp*180/3.14, yaw_tmp*180/3.14);
+        PublishMsgs();
+#endif
       }
     } else if (node_state_ == NodeState::PAUSE) {
       std::unique_lock<std::mutex> lock(mutex_);

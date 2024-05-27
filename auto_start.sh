@@ -1,6 +1,7 @@
 #!/bin/bash
 
 echo "123456" | sudo -S chmod 777 /dev/ttyACM0
+echo "123456" | sudo -S chmod 777 /dev/ttyACM1
 
 # base
 source ~/masvision_v3/devel/setup.bash 
