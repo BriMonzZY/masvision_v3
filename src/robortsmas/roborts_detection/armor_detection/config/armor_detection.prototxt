@@ -1,13 +1,13 @@
 name: "constraint_set"  # 装甲板识别算法的名称
 selected_algorithm: "constraint_set" # 选择装甲板识别算法的名称
-undetected_armor_delay: 5 # 未检测到装甲板时, 继续发布上一帧数据的次数
+undetected_armor_delay: 30 # 未检测到装甲板时, 继续发布上一帧数据的次数
 camera_name: "hikrobot_camera" # 相机名称, 应该和roborts_camera配置文件中的camera_name相同
 camera_gimbal_transform {
     offset_x :0 # 相机与云台x方向偏移
     offset_y :0 # 相机与云台y方向偏移
     offset_z :50 # 相机与云台z方向偏移
-    offset_pitch : -8 # 相机与云台pitch角偏移
-    offset_yaw : -10  # 相机与云台yaw角偏移
+    offset_pitch : -9 # 相机与云台pitch角偏移 向下调减小
+    offset_yaw : -13.5   # 相机与云台yaw角偏移 向左调增大
 }
 
 projectile_model_info {

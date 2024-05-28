@@ -8,6 +8,7 @@
 !*.h
 !auto_start.sh
 !auto_start_double.sh
+!image_save.sh
 !*.md
 !*.pdf
 /build

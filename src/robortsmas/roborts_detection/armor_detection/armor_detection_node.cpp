@@ -233,6 +233,10 @@ void ArmorDetectionNode::ExecuteLoop() {
 
       } else if(undetected_count_ != 0) {
 
+        // close shoot
+        ShootCmd_.request.mode = SHOOT_STOP;
+        shoot_client.call(ShootCmd_);
+
         gimbal_angle_.yaw_mode = true;
         gimbal_angle_.pitch_mode = false;
         gimbal_angle_.yaw_angle = 0;

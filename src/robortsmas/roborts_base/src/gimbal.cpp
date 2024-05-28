@@ -119,9 +119,11 @@ bool Gimbal::CtrlFricWheelService(roborts_msgs::FricWhl::Request &req,
                                   roborts_msgs::FricWhl::Response &res){
   roborts_sdk::cmd_fric_wheel_speed fric_speed;
   if(req.open){
-    fric_speed.left = 1240;
-    fric_speed.right = 1240;
+    ROS_WARN("FricWhl open");
+    fric_speed.left = 1700;
+    fric_speed.right = 1700;
   } else{
+    ROS_WARN("FricWhl close");
     fric_speed.left = 1000;
     fric_speed.right = 1000;
   }
@@ -132,14 +134,16 @@ bool Gimbal::CtrlFricWheelService(roborts_msgs::FricWhl::Request &req,
 bool Gimbal::CtrlShootService(roborts_msgs::ShootCmd::Request &req,
                               roborts_msgs::ShootCmd::Response &res){
   roborts_sdk::cmd_shoot_info gimbal_shoot;
-  uint16_t default_freq = 1500;
+  uint16_t default_freq = 2500;
   switch(static_cast<roborts_sdk::shoot_cmd_e>(req.mode)){
     case roborts_sdk::SHOOT_STOP:
+      ROS_WARN("SHOOT_STOP");
       gimbal_shoot.shoot_cmd = roborts_sdk::SHOOT_STOP;
       gimbal_shoot.shoot_add_num = 0;
       gimbal_shoot.shoot_freq = 0;
       break;
     case roborts_sdk::SHOOT_ONCE:
+      ROS_WARN("SHOOT_ONCE");
       if(req.number!=0){
         gimbal_shoot.shoot_cmd = roborts_sdk::SHOOT_ONCE;
         gimbal_shoot.shoot_add_num = req.number;
@@ -152,6 +156,7 @@ bool Gimbal::CtrlShootService(roborts_msgs::ShootCmd::Request &req,
       }
       break;
     case roborts_sdk::SHOOT_CONTINUOUS:
+      ROS_WARN("SHOOT_CONTINUOUS");
       gimbal_shoot.shoot_cmd = roborts_sdk::SHOOT_CONTINUOUS;
       gimbal_shoot.shoot_add_num = req.number;
       gimbal_shoot.shoot_freq = default_freq;
